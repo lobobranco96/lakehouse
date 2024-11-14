@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}               # usuário root para o MinIO
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}       # senha root para o MinIO
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+      - ./minio/include:/include                        # Volume para dados a serem copiados
+      - ./minio/bucket-init.sh:/bucket-init.sh          # Script para criar buckets e fazer upload
+      - ./minio/data:/data                              # Pasta persistente para dados do MinIO
+      - ./minio/minio-client:/root/.mc                  # Configuração persistente do MinIO Client
+    entrypoint: /bin/sh -c "/bucket-init.sh & /usr/bin/docker-entrypoint.sh minio server /data --console-address ':9001'"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - lakehouse-network
+
+volumes:
+  minio_data:
+
+networks:
+  lakehouse-network:
+    driver: bridge
