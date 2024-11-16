@@ -9,12 +9,20 @@ services:
       - SPARK_RPC_ENCRYPTION_ENABLED=no
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
+      - SPARK_ICEBERG_CATALOG=hadoop
+      - SPARK_ICEBERG_CATALOG_URI=iceberg://spark:7077
+      - SPARK_ICEBERG_STORAGE_URI=s3a://bronze/
     ports:
       - '8080:8080'
       - '7077:7077'
     volumes:
       - ./data:/data
-      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
   spark-worker:
     build: ./spark
     environment:
@@ -26,22 +34,30 @@ services:
       - SPARK_RPC_ENCRYPTION_ENABLED=no
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
       - SPARK_SSL_ENABLED=no
+      - SPARK_ICEBERG_CATALOG=hadoop
+      - SPARK_ICEBERG_CATALOG_URI=iceberg://spark:7077
+      - SPARK_ICEBERG_STORAGE_URI=s3a://bronze/
     volumes:
       - ./data:/data
+    depends_on:
+      spark:
+        condition: service_healthy
 
   jupyter:
     build: ./jupyter/
     environment:
       - S3_ENDPOINT=http://minio:9001
-      - S3_BUCKET= bronze
-      - S3_ACCESS_KEY= ${MINIO_ACCESS_KEY}
-      - S3_SECRET_KEY= ${MINIO_SECRET_KEY}
-    ports: 
+      - S3_BUCKET=bronze
+      - S3_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - S3_SECRET_KEY=${MINIO_SECRET_KEY}
+      - SPARK_ICEBERG_CATALOG=hadoop
+      - SPARK_ICEBERG_CATALOG_URI=iceberg://spark:7077
+      - SPARK_ICEBERG_STORAGE_URI=s3a://bronze/
+    ports:
       - 8888:8888
     volumes:
-      #- ./data:/data
       - ./jupyter/notebooks/:/notebooks/
-
+      
   minio:
     image: minio/minio:latest
     container_name: minio
@@ -69,8 +85,27 @@ services:
     networks:
       - lakehouse-network
 
+  nessie:
+    image: projectnessie/nessie:latest
+    container_name: nessie
+    environment:
+      - NESSIE_DB_TYPE=rocksdb        # Pode ser ajustado conforme o tipo de banco de dados que você deseja usar (exemplo: rocksdb, postgres, etc)
+      - NESSIE_SERVER_PORT=19120      # Porta padrão do Nessie
+    ports:
+      - "19120:19120"                 # Porta do servidor Nessie
+    volumes:
+      - nessie_data:/data             # Volumes persistentes para o Nessie
+    networks:
+      - lakehouse-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:19120/"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
 volumes:
   minio_data:
+  nessie_data:
 
 networks:
   lakehouse-network:
