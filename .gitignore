@@ -1,12 +1,10 @@
 .git
-.env
 .DS_Store
 __pycache__/
 .venv
+.backup
 minio/include/
 dags/testes/
 backup/
 jars.txt
-postgres/
-mariadb/
-hive-metastore/
+teste/

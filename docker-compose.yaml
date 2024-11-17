@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   spark:
     build: ./spark
@@ -46,17 +44,22 @@ services:
   jupyter:
     build: ./jupyter/
     environment:
-      - S3_ENDPOINT=http://minio:9001
-      - S3_BUCKET=bronze
+      - JUPYTER_TOKEN=TestTest123
+      - S3_ENDPOINT=http://minio:9000
+      - S3_BUCKET=landing
       - S3_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - S3_SECRET_KEY=${MINIO_SECRET_KEY}
       - SPARK_ICEBERG_CATALOG=hadoop
       - SPARK_ICEBERG_CATALOG_URI=iceberg://spark:7077
-      - SPARK_ICEBERG_STORAGE_URI=s3a://bronze/
+      - SPARK_ICEBERG_STORAGE_URI=s3a://landing/
+    #command: start-notebook.sh --NotebookApp.token=${JUPYTER_TOKEN}
     ports:
       - 8888:8888
     volumes:
       - ./jupyter/notebooks/:/notebooks/
+    depends_on:
+      minio:
+        condition: service_healthy
       
   minio:
     image: minio/minio:latest
@@ -65,23 +68,57 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}               # usuário root para o MinIO
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}       # senha root para o MinIO
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_REGION: ${MINIO_REGION}
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
-      - ./minio/include:/include                        # Volume para dados a serem copiados
-      - ./minio/bucket-init.sh:/bucket-init.sh          # Script para criar buckets e fazer upload
-      - ./minio/data:/data                              # Pasta persistente para dados do MinIO
-      - ./minio/minio-client:/root/.mc                  # Configuração persistente do MinIO Client
-    entrypoint: /bin/sh -c "/bucket-init.sh && /usr/bin/docker-entrypoint.sh minio server /data --console-address ':9001'"
+      - ./minio/include:/include
+      - ./minio/data:/data
+      - ./minio/minio-client:/root/.mc
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      - lakehouse-network
+
+  minio-bucket:
+    image: minio/mc:latest
+    container_name: minio-bucket
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./minio/include:/include  # Inclui arquivos para upload
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} >/dev/null 2>&1; do
+        echo 'Aguardando MinIO...';
+        sleep 5;
+      done;
+      echo 'MinIO está pronto. Iniciando configuração dos buckets.';
+      mc mb myminio/landing;
+      mc mb myminio/bronze;
+      mc mb myminio/silver;
+      mc mb myminio/gold;
+      echo 'Buckets criados com sucesso.';
+      mc anonymous set public myminio/landing;
+      mc anonymous set public myminio/bronze;
+      mc anonymous set public myminio/silver;
+      mc anonymous set public myminio/gold;
+      echo 'Políticas de acesso definidas para público.';
+      echo 'Copiando arquivos para o bucket landing.';
+      mc cp /include/marca_carro.csv myminio/landing/marca_carro.csv;
+      echo 'Arquivos copiados com sucesso.';
+      "
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     networks:
       - lakehouse-network
 
