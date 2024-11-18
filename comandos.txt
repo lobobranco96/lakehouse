@@ -3,3 +3,11 @@ docker-compose up -d
 
 docker-compose down -v
 docker-compose down
+
+#enviando atualização
+
+git status
+git add .
+git commit -m "nova atualização"
+git pull --rebase origin main
+git push origin main

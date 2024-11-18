@@ -1,0 +1,4 @@
+pyspark==3.5.1
+jupyterlab==4.2.5
+pyiceberg[s3fs,hive]==0.7.1
+ipython_sql

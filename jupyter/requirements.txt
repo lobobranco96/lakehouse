@@ -1,2 +1,0 @@
-pyspark
-delta-spark==2.1.0
