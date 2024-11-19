@@ -25,6 +25,8 @@ x-spark-worker-default: &spark_worker_default
     - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
     - SPARK_SSL_ENABLED=no
     - SPARK_USER=spark
+  networks:
+    - lakehouse_network
 
 
 services:
@@ -42,6 +44,8 @@ services:
       - SPARK_USER=spark
     ports:
       - '18080:8080'
+    networks:
+      - lakehouse_network
 
   spark-worker-1:
     container_name: spark-worker-1
@@ -50,6 +54,7 @@ services:
   spark-worker-2:
     container_name: spark-worker-2
     <<: *spark_worker_default
+    
 
 
 networks:

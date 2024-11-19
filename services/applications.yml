@@ -1,0 +1,39 @@
+x-common-log-config: &default_config
+  networks:
+    - lakehouse_network
+  env_file:
+    - ./conf/.lakehouse.conf
+    - ./conf/.secrets.conf
+
+x-common-healthcheck-default: &default_healthcheck
+  timeout: 45s
+  interval: 10s
+  retries: 10
+  start_period: 10s
+
+services:
+
+  notebook:
+    build: ../docker/customized/notebook
+    container_name: notebook
+    <<: *default_config
+    ports:
+      - 8888:8888
+    volumes:
+      - ../mnt/notebooks:/app/
+    environment:
+      - S3_ENDPOINT=http://minio:9000
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - SPARK_SUBMIT_OPTIONS=--conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 \
+                             --conf spark.hadoop.fs.s3a.path.style.access=true \
+                             --conf spark.hadoop.fs.s3a.access.key=admin \
+                             --conf spark.hadoop.fs.s3a.secret.key=password
+
+    networks:
+    - lakehouse_network
+
+
+networks:
+  lakehouse_network:
+    name: lakehouse_network

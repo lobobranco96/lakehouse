@@ -16,8 +16,12 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
-    env_file:
-      - ./conf/.lakehouse.conf
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password
+      - MINIO_DOMAIN=storage
+      - MINIO_REGION_NAME=us-east-1
+      - MINIO_REGION=us-east-1
     command: server /data --console-address ":9001"
     volumes:
       - lakehouse_minio_vol:/data
@@ -61,8 +65,11 @@ services:
       mc cp /include/marca_carro.csv myminio/landing/marca_carro.csv;
       echo 'Arquivos copiados com sucesso.';
       "
-    env_file:
-      - ./conf/.lakehouse.conf
+    environment:
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
+      - AWS_DEFAULT_REGION=us-east-1
     networks:
       - lakehouse_network
 

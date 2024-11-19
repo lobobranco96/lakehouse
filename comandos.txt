@@ -11,3 +11,8 @@ git add .
 git commit -m "nova atualização"
 git pull --rebase origin main
 git push origin main
+
+
+docker compose -f services/lakehouse.yml up -d --build
+docker compose -f services/processing.yml up -d --build
+docker compose -f services/applications.yml up -d --build
