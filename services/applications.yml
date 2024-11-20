@@ -23,6 +23,7 @@ services:
       - ../mnt/notebooks:/app/
     environment:
       - S3_ENDPOINT=http://minio:9000
+      - NESSIE_URI=http://nessie:19120/api/v1
       - AWS_ACCESS_KEY_ID=admin
       - AWS_SECRET_ACCESS_KEY=password
       - SPARK_SUBMIT_OPTIONS=--conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 \
