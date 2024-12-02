@@ -1,6 +1,9 @@
 x-common-log-config: &default_config
   networks:
     - lakehouse_network
+  env_file:
+    - ./conf/.lakehouse.conf
+    - ./conf/.secrets.conf
 
 x-common-healthcheck-default: &default_healthcheck
   timeout: 45s
@@ -25,7 +28,6 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - lakehouse_minio_vol:/data
-      - ./minio/include:/include
       - ./minio/data:/data
       - ./minio/minio-client:/root/.mc
     healthcheck:
@@ -76,13 +78,13 @@ services:
   postgres_nessie:
     image: postgres:16
     container_name: postgres_nessie
+    <<: *default_config
     environment:
       POSTGRES_USER: nessie
       POSTGRES_PASSWORD: nessie
       POSTGRES_DB: nessie
     volumes:
       - lakehouse_pg_nessie_vol:/var/lib/postgresql/data
-    <<: *default_config
 
   nessie:
     image: bitnami/nessie:0.99.0

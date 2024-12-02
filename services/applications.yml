@@ -3,7 +3,6 @@ x-common-log-config: &default_config
     - lakehouse_network
   env_file:
     - ./conf/.lakehouse.conf
-    - ./conf/.secrets.conf
 
 x-common-healthcheck-default: &default_healthcheck
   timeout: 45s
@@ -30,10 +29,8 @@ services:
                              --conf spark.hadoop.fs.s3a.path.style.access=true \
                              --conf spark.hadoop.fs.s3a.access.key=admin \
                              --conf spark.hadoop.fs.s3a.secret.key=password
-
     networks:
     - lakehouse_network
-
 
 networks:
   lakehouse_network:
