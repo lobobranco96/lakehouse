@@ -10,4 +10,4 @@ jars.txt
 teste/
 README.md
 comandos.txt
-mnt/notebooks/spark-warehouse
+mnt/notebooks/.ipynb_checkpoints

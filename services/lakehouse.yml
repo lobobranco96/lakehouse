@@ -28,7 +28,7 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - lakehouse_minio_vol:/data
-      - ./minio/data:/data
+    #  - ./minio/data:/data
       - ./minio/minio-client:/root/.mc
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -64,7 +64,11 @@ services:
       mc anonymous set public myminio/gold;
       echo 'Políticas de acesso definidas para público.';
       echo 'Copiando arquivos para o bucket landing.';
-      mc cp /include/marca_carro.csv myminio/landing/marca_carro.csv;
+      mc cp include/MICRODADOS_ENEM_2019.csv myminio/landing/MICRODADOS_ENEM_2019.csv;
+      mc cp include/MICRODADOS_ENEM_2020.csv myminio/landing/MICRODADOS_ENEM_2020.csv;
+      mc cp include/MICRODADOS_ENEM_2021.csv myminio/landing/MICRODADOS_ENEM_2021.csv;
+      mc cp include/MICRODADOS_ENEM_2022.csv myminio/landing/MICRODADOS_ENEM_2022.csv;
+      mc cp include/MICRODADOS_ENEM_2023.csv myminio/landing/MICRODADOS_ENEM_2023.csv;
       echo 'Arquivos copiados com sucesso.';
       "
     environment:
