@@ -1,0 +1,65 @@
+x-common-log-config: &default_config
+  networks:
+    - lakehouse_network
+  env_file:
+    - ./conf/.lakehouse.conf
+
+x-common-healthcheck-default: &default_healthcheck
+  timeout: 45s
+  interval: 10s
+  retries: 10
+  start_period: 10s
+
+services:
+
+  dremio:
+    image: dremio/dremio-oss:25.1
+    ports:
+      - 9047:9047
+      # - 31010:31010
+      # - 32010:32010
+    container_name: dremio
+    volumes:
+      - dremio_warehouse_vol:/opt/dremio/data
+    <<: *default_config
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    hostname: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ../docker/customized/Prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-dev-data:/prometheus
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "9090" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    <<: *default_config
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "prometheus", "9090" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    <<: *default_config
+    volumes:
+      - grafana_dev_vol:/var/lib/grafana
+
+volumes:
+  dremio_warehouse_vol:
+  prometheus-dev-data:
+  grafana_dev_vol:
+
+networks:
+  lakehouse_network:
+    name: lakehouse_network
