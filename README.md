@@ -88,9 +88,8 @@ Para configurar o MinIO:
 
 1. Acesse o MinIO em [http://localhost:9000](http://localhost:9000).
 2. Faça login com o usuário **admin** e senha **password**.
-3. Crie um bucket chamado `wsl`.
-4. Gere uma **API Key** para acesso ao MinIO.
-5. Armazene as chaves no arquivo `/services/conf/.secrets.conf` para configurar os serviços que irão acessar o MinIO.
+3. Gere uma **API Key** para acesso ao MinIO.
+4. Armazene as chaves no arquivo `/services/conf/.lakehouse.conf` para configurar os serviços que irão acessar o MinIO.
 
 ### Ferramenta de Query Engine Dremio
 
