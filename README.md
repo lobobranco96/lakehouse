@@ -104,13 +104,13 @@ Configure o Dremio para conectar-se ao MinIO e ao Nessie:
 
 O desafio consiste em responder a diversas perguntas analíticas baseadas em informações retiradas do Exame Nacional do Ensino Médio. As perguntas são:
 
-1. **Qual o Participante com maior media por cada ano de realização do exame**.
-2. **Qual a escola com a maior média de notas por ano?**.
-3. **Os 10 alunos com a maior média de notas e o valor dessa média**.
-4. **Qual o % de Ausentes por ano**.
-5. **Qual o número total de Inscritos por ano?**.
-6. **Qual a média por Sexo e Ano?**
-7. **Média por Etnia e por Ano**
+1. **Qual o Participante com maior media por cada ano de realização do exame**. ![dremio_pergunta1](https://github.com/user-attachments/assets/4ae2b0eb-5317-455d-b679-906eb1827c98)
+2. **Qual a escola com a maior média de notas por ano?**. ![dremio_pergunta2](https://github.com/user-attachments/assets/5868871c-115c-4e1f-8cce-05891fcabf7b)
+3. **Os 10 alunos com a maior média de notas e o valor dessa média**. ![dremio_pergunta3](https://github.com/user-attachments/assets/0de789a6-256a-4eea-810c-bf6f392dda15)
+4. **Qual o % de Ausentes por ano**. ![dremio_pergunta4](https://github.com/user-attachments/assets/a8e876e0-9c19-4c7e-aaa5-9238cef5f0df)
+5. **Qual o número total de Inscritos por ano?**. ![dremio_pergunta5](https://github.com/user-attachments/assets/3900e8f2-26e4-4deb-b3f5-00eaaeb9f490)
+6. **Qual a média por Sexo e Ano?** ![dremio_pergunta6](https://github.com/user-attachments/assets/1042696c-b433-46a3-8325-11116f30e0cf)
+7. **Média por Etnia e por Ano** ![dremio_pergunta7](https://github.com/user-attachments/assets/392b513e-a1e7-439d-9b89-0c2ed16e2923)
 
 As respostas são extraídas através de views e tabelas no Dremio, criadas a partir das camadas `bronze`, `silver` e `gold`.
 
